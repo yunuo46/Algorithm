@@ -5,28 +5,23 @@ using namespace std;
 
 vector<int> v;
 int n,m, num, l, r;
-int ans;
+int ans, dif;
 
 void TwoPointer() {
 	l = 0, r = 0;
-	int dif = v[r] - v[l] - m;
-	while (l <= r && r < n) {
+	while (l < n && r < n) {
+		dif = v[r] - v[l] - m;
 		if (dif == 0) {
 			ans = 0;
 			break;
 		}
 		else if (dif < 0) {
-			if (r == n - 1) {
-				if (l == n - 1)break;
-				else l++;
-			}
-			else r++;
+			r++;
 		}
 		else {
 			if (dif < ans) ans = dif;
 			l++;
 		}
-		dif = v[r] - v[l] - m;
 	}
 }
 
