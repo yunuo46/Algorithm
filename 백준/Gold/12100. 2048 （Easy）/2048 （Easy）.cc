@@ -6,11 +6,13 @@ using namespace std;
 
 vector<int> v;
 int n, num, ans = 0;
+int branch_cut[11];
+int board[20][20];
 
-vector<vector<int>> right(vector<vector<int>> board) {
+void right() {
 	for (int i = 0; i < n; i++) {
 		v.clear();
-		for (int j = n-1; j >= 0; j--) {
+		for (int j = n - 1; j >= 0; j--) {
 			if (board[i][j]) v.push_back(board[i][j]);
 		}
 		if (v.empty())continue;
@@ -36,9 +38,8 @@ vector<vector<int>> right(vector<vector<int>> board) {
 			board[i][j] = 0;
 		}
 	}
-	return board;
 }
-vector<vector<int>> left(vector<vector<int>> board) {
+void left() {
 	for (int i = 0; i < n; i++) {
 		v.clear();
 		for (int j = 0; j < n; j++) {
@@ -63,13 +64,12 @@ vector<vector<int>> left(vector<vector<int>> board) {
 			}
 		}
 		if (idxVec == v.size() - 1)board[i][idx] = v[idxVec];
-		for (int j = n-cntZero; j < n; j++) {
+		for (int j = n - cntZero; j < n; j++) {
 			board[i][j] = 0;
 		}
 	}
-	return board;
 }
-vector<vector<int>> up(vector<vector<int>> board) {
+void up() {
 	for (int i = 0; i < n; i++) {
 		v.clear();
 		for (int j = 0; j < n; j++) {
@@ -99,17 +99,16 @@ vector<vector<int>> up(vector<vector<int>> board) {
 			board[j][i] = 0;
 		}
 	}
-	return board;
 }
-vector<vector<int>> down(vector<vector<int>> board) {
+void down() {
 	for (int i = 0; i < n; i++) {
 		v.clear();
-		for (int j = n-1; j >= 0; j--) {
+		for (int j = n - 1; j >= 0; j--) {
 			if (board[j][i]) v.push_back(board[j][i]);
 		}
 		if (v.empty())continue;
 		int cntZero = n - v.size();
-		int idx = n-1;
+		int idx = n - 1;
 		int idxVec = 0;
 		while (idxVec < v.size() - 1) {
 			if (v[idxVec] == v[idxVec + 1]) {
@@ -130,28 +129,72 @@ vector<vector<int>> down(vector<vector<int>> board) {
 			board[j][i] = 0;
 		}
 	}
-	return board;
 }
 
-void dfs(int cnt, vector<vector<int>> board) {
+bool same(int tmp[20][20]) {
+	for (int i = 0; i < n; i++)
+		for (int j = 0; j < n; j++)
+			if (tmp[i][j] != board[i][j]) return false;
+	return true;
+}
+
+void dfs(int cnt) {
 	/*cout << endl;
+	cout << cnt << endl;
 	for (int i = 0; i < n; i++) {
 		for (int j = 0; j < n; j++) {
 			cout << board[i][j] << " ";
 		}
 		cout << endl;
 	}*/
-	if (cnt == 5) return;
-	dfs(cnt + 1, right(board));
-	dfs(cnt + 1, left(board));
-	dfs(cnt + 1, up(board));
-	dfs(cnt + 1, down(board));
+
+	int max_value = 0;
+	for (int i = 0; i < n; i++)
+		for (int j = 0; j < n; j++)
+			max_value = max(max_value, board[i][j]);
+
+	if (max_value <= branch_cut[cnt]) return;
+	if (cnt == 5) {
+		ans = max(ans, max_value);
+		int temp = ans;
+		while (cnt > 0) {
+			branch_cut[cnt--] = temp;
+			temp /= 2;
+		}
+		return;
+	}
+
+	int temp[20][20]; // 초기상태 저장
+	for (int i = 0; i < n; i++)
+		for (int j = 0; j < n; j++)
+			temp[i][j] = board[i][j];
+
+	for (int dir = 0; dir < 4; dir++) {
+		switch (dir) {
+		case 0:
+			left();
+			break;
+		case 1:
+			right();
+			break;
+		case 2:
+			up();
+			break;
+		case 3:
+			down();
+			break;
+		}
+		if (same(temp)) continue; // 이동했는데 이전과 같은경우 탐색안함
+		dfs(cnt + 1);
+		for (int i = 0; i < n; i++)
+			for (int j = 0; j < n; j++)
+				board[i][j] = temp[i][j];
+	}
 }
 
 int32_t main() {
 	ios_base::sync_with_stdio(false); cin.tie(0); cout.tie(0);
 	cin >> n;
-	vector<vector<int>> board(n, vector<int>(n));
 	for (int i = 0; i < n; i++) {
 		for (int j = 0; j < n; j++) {
 			cin >> num;
@@ -159,7 +202,7 @@ int32_t main() {
 			board[i][j] = num;
 		}
 	}
-	dfs(0, board);
+	dfs(0);
 	cout << ans;
 	return 0;
 }
