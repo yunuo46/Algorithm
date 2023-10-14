@@ -3,18 +3,18 @@
 using namespace std;
 
 int n;
-vector<long long> sol;
+vector<int> sol;
 
-int check(long long n) {
+int check(int n) {
 	for (int i = 2; i * i <= n; i++) {
 		if (n % i == 0) return 0;
 	}
 	return 1;
 }
 
-void dfs(int now, long long num) {
+void dfs(int now, int num) {
     int flag;
-    long long temp;
+    int temp;
 
     if (now == n) {
         sol.push_back(num);
